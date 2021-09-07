@@ -1,3 +1,4 @@
+import React from 'react';
 import StarRating from './StarRating';
 
 const Place = ({id, name, rating, onRate}) => {
@@ -9,14 +10,14 @@ const Place = ({id, name, rating, onRate}) => {
   );
 };
 
-export default function Places({places = [], onRate}) {
+export default React.memo(function Places({places = [], onRate}) {
   return (
     <div className="flex flex-wrap">
       {places
         .sort((a, b) => a.name.toUpperCase().localeCompare(b.name.toUpperCase()))
-        .map((p, i) => (
+        .map((p) => (
           <Place key={p.id} {...p} onRate={onRate} />
         ))}
     </div>
   );
-}
+})
