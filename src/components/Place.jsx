@@ -1,9 +1,9 @@
 import { memo, useCallback } from 'react';
 import StarRating from './StarRating';
-import { usePlaces } from '../contexts/PlacesProvider';
+import { useRatePlace } from '../store/places';
 
 const Place = memo(({ id, name, rating }) => {
-	const { ratePlace } = usePlaces();
+	const ratePlace = useRatePlace();
 
 	const handleRate = useCallback((newRating) => {
 		ratePlace(id, newRating);

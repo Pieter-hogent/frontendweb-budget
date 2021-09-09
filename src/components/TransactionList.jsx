@@ -1,10 +1,10 @@
-import React, { useContext, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { TransactionsContext } from '../contexts/TransactionsProvider';
+import { useTransactions } from '../store/transactions';
 import Transaction from './Transaction';
 
 export default function TransactionList({ search }) {
-	const { transactions, error, loading } = useContext(TransactionsContext);
+	const { transactions, error, loading } = useTransactions();
 
 	const filteredTransactions = useMemo(() => {
 		return transactions.filter((t) => {

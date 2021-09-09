@@ -1,10 +1,10 @@
-import { useContext, useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { Link, useParams, useHistory } from 'react-router-dom';
-import { useTransactions } from '../contexts/TransactionsProvider';
-import { PlacesContext } from '../contexts/PlacesProvider.js';
 import LabelInput from '../components/LabelInput';
 import LabelSelect from '../components/LabelSelect';
+import { usePlaces } from '../store/places';
+import { useCurrentTransaction, useCreateOrUpdateTransaction } from '../store/transactions';
 
 const validationRules = {
   user: {
@@ -44,10 +44,10 @@ export default function TransactionForm() {
     setValue,
   } = useForm();
 
-  const {currentTransaction, setTransactionToUpdate, createOrUpdateTransaction} =
-    useTransactions();
+  const [currentTransaction, setTransactionToUpdate] = useCurrentTransaction();
+  const createOrUpdateTransaction = useCreateOrUpdateTransaction();
 
-  const {places} = useContext(PlacesContext);
+  const { places } = usePlaces();
 
   useEffect(() => {
     if (

@@ -1,5 +1,5 @@
 import PlacesList from '../components/PlacesList';
-import { usePlaces } from '../contexts/PlacesProvider';
+import usePlaces from '../store/places';
 
 export default function Places() {
   const { places } = usePlaces();

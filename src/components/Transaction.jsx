@@ -1,15 +1,15 @@
-import { memo, useCallback, useContext } from 'react';
+import { useCallback, memo } from 'react';
 import { Link } from 'react-router-dom';
 import { IoTrashOutline, IoPencil } from 'react-icons/io5';
-import { TransactionsContext } from '../contexts/TransactionsProvider';
+import { useDeleteTransaction } from '../store/transactions';
 
-const Transaction = memo(({ id, date, amount, user, place }) => {
-	const { deleteTransaction } =
-		useContext(TransactionsContext);
+const Transaction =  memo(({ id, date, amount, user, place }) => {
+  const deleteTransaction = useDeleteTransaction();
 
-	const handleRemove = useCallback(() => {
-		deleteTransaction(id);
-	}, [deleteTransaction, id]);
+	const handleRemove = useCallback(
+    () => deleteTransaction(id),
+    [deleteTransaction, id],
+  );
 
 	return (
 		<tr data-cy="transaction">
@@ -34,4 +34,3 @@ const Transaction = memo(({ id, date, amount, user, place }) => {
 });
 
 export default Transaction;
-

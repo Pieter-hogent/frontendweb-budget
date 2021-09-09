@@ -16,7 +16,7 @@ const Star = memo(({
   );
 });
 
-export default function StarRating({ totalStars = 5, selectedStars = 0, onRate }) {
+export default memo(function StarRating({ totalStars = 5, selectedStars = 0, onRate }) {
   const stars = useMemo(() => [...new Array(totalStars)], [totalStars]);
   return (
     <>
@@ -28,4 +28,4 @@ export default function StarRating({ totalStars = 5, selectedStars = 0, onRate }
       </p>
     </>
   );
-}
+})
