@@ -35,4 +35,3 @@ const Transaction = memo(({ id, date, amount, user, place }) => {
 
 export default Transaction;
 
-
