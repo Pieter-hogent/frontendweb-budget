@@ -6,8 +6,6 @@ import {
   useMemo,
   useReducer,
 } from 'react';
-import axios from 'axios';
-import config from '../../config.json';
 import {
   placeCreated,
   placeDeleted,
@@ -18,6 +16,7 @@ import {
   startLoading,
 } from './actions';
 import reducer, { initialState } from './reducer';
+import * as placesApi from '../../api/places';
 
 const PlacesContext = createContext();
 
@@ -59,9 +58,7 @@ const PlacesStore = ({
   const refreshPlaces = useCallback(async () => {
     try {
       dispatch(startLoading());
-      const {
-        data
-      } = await axios.get(`${config.base_url}places`);
+      const data = await placesApi.getAllPlaces();
       dispatch(placesFetched(data));
     } catch (error) {
       dispatch(setError(error));
@@ -73,20 +70,10 @@ const PlacesStore = ({
     name,
     rating
   }) => {
-    dispatch(startLoading());
     try {
-      const {
-        data: changedPlace
-      } = await axios({
-        method: id ? 'put' : 'post',
-        url: `${config.base_url}places/${id ?? ''}`,
-        data: {
-          name,
-          rating
-        },
-      });
-      console.log('changedPlace', changedPlace);
-      dispatch(id ? placeUpdated(changedPlace) : placeCreated(changedPlace));
+      dispatch(startLoading());
+      const changedPlace = await placesApi.savePlace({ id, name, rating });
+      dispatch((id ? placeUpdated : placeCreated)(changedPlace));
       return changedPlace;
     } catch (error) {
       dispatch(setError(error));
@@ -99,12 +86,9 @@ const PlacesStore = ({
   }, [state.places, createOrUpdatePlace]);
 
   const deletePlace = useCallback(async (id) => {
-    dispatch(startLoading());
     try {
-      await axios({
-        method: 'delete',
-        url: `${config.base_url}places/${id}`,
-      });
+      dispatch(startLoading());
+      await placesApi.deletePlace();
       dispatch(placeDeleted(id));
     } catch (error) {
       dispatch(setError(error));

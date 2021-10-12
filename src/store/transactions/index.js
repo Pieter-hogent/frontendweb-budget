@@ -6,8 +6,6 @@ import {
 	useContext,
   useReducer,
 } from 'react';
-import axios from 'axios';
-import config from '../../config.json';
 import {
   selectTransaction,
   setError,
@@ -18,6 +16,7 @@ import {
   transactionsFetched
 } from './actions';
 import reducer, { initialState } from './reducer';
+import * as transactionsApi from '../../api/transactions';
 
 const TransactionsContext = createContext();
 export const useTransactionsContext = () => useContext(TransactionsContext);
@@ -53,9 +52,7 @@ const TransactionsStore = ({ children }) => {
 	const refreshTransactions = useCallback(async () => {
 		try {
       dispatch(startLoading());
-			const { data } = await axios.get(
-				`${config.base_url}transactions?limit=25&offset=0`
-			);
+			const data = await transactionsApi.getAllTransactions();
       dispatch(transactionsFetched(data));
 		} catch (error) {
 			dispatch(setError(error));
@@ -64,19 +61,15 @@ const TransactionsStore = ({ children }) => {
 
 	const createOrUpdateTransaction = useCallback(
 		async ({ id, placeId, amount, date, user }) => {
-      dispatch(startLoading());
-
 			try {
-				const { data: changedTransaction } = await axios({
-					method: id ? 'put' : 'post',
-					url: `${config.base_url}transactions/${id ?? ''}`,
-					data: {
-            placeId,
-            amount,
-            date: date.toISOString(),
-            user,
-          },
-				});
+        dispatch(startLoading());
+        const changedTransaction = await transactionsApi.saveTransaction({
+          id,
+          placeId,
+          amount,
+          date,
+          user,
+        })
 				dispatch((id ? transactionUpdated : transactionCreated)(changedTransaction));
 			} catch (error) {
 			  dispatch(setError(error));
@@ -89,10 +82,7 @@ const TransactionsStore = ({ children }) => {
 		async (id) => {
 			try {
         dispatch(startLoading());
-				await axios({
-					method: 'delete',
-					url: `${config.base_url}transactions/${id}`,
-				});
+				await transactionsApi.deleteTransaction(id);
 				dispatch(transactionDeleted(id));
 			} catch (error) {
 			  dispatch(setError(error));
