@@ -1,5 +1,5 @@
 import { useFormContext, useForm, FormProvider } from 'react-hook-form';
-import { useCreateOrUpdateTransaction, useCurrentTransaction } from '../store/transactions';
+import { useTransactions, useCreateOrUpdateTransaction, useCurrentTransaction } from '../store/transactions';
 import { usePlaces } from '../store/places';
 import { useEffect, useCallback } from 'react';
 
@@ -79,10 +79,11 @@ const toDateInputString = (date) => {
 };
 
 export default function TransactionForm() {
+  const { loading, error } = useTransactions();
 	const {
 		register,
 		handleSubmit,
-		formState: { errors },
+		formState: { errors, isDirty, isValid },
 		reset,
 		setValue,
 	} = useForm();
@@ -137,6 +138,7 @@ export default function TransactionForm() {
 			register={register}
 		>
 			<form onSubmit={handleSubmit(onSubmit)} className="m-5">
+        {error && <p className="text-red-500">{JSON.stringify(error, null, 2)}</p>}
 				<div className="grid grid-cols-6 gap-6">
 					<LabelInput
 						label="user"
@@ -163,7 +165,10 @@ export default function TransactionForm() {
 					/>
 					<div className="col-span-6 sm:col-span-3">
 						<div className="flex justify-end">
-							<button data-cy="submitButton" type="submit">
+							<button
+                data-cy="submitButton"
+                type="submit"
+                disabled={(!isDirty && !isValid) || loading}>
 								{' '}
 								{currentTransaction?.id
 									? 'Save Transaction'
