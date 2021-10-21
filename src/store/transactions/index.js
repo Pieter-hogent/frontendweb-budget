@@ -19,7 +19,7 @@ import reducer, { initialState } from './reducer';
 import * as transactionsApi from '../../api/transactions';
 
 const TransactionsContext = createContext();
-export const useTransactionsContext = () => useContext(TransactionsContext);
+const useTransactionsContext = () => useContext(TransactionsContext);
 
 const useTransactionsState = () => {
   const { state } = useTransactionsContext();
