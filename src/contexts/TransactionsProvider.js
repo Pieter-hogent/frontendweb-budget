@@ -36,10 +36,8 @@ export const TransactionsProvider = ({
   }, []);
 
   useEffect(() => {
-    if (transactions?.length === 0) {
-      refreshTransactions();
-    }
-  }, [transactions, refreshTransactions]);
+    refreshTransactions();
+  }, [refreshTransactions]);
 
   const createOrUpdateTransaction = useCallback(async ({
     id,
@@ -72,7 +70,7 @@ export const TransactionsProvider = ({
       console.log(error);
       throw error;
     } finally {
-        setLoading(false);      
+        setLoading(false);
     }
   }, [refreshTransactions]);
 
@@ -113,9 +111,9 @@ export const TransactionsProvider = ({
     setTransactionToUpdate
   ]);
 
-  return ( 
-  <TransactionsContext.Provider value = {value} > 
-    {children} 
+  return (
+  <TransactionsContext.Provider value = {value} >
+    {children}
   </TransactionsContext.Provider>
   );
 };
