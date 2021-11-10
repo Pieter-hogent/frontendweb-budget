@@ -8,18 +8,19 @@ import {
   } from 'react';
   import axios from 'axios';
   import config from '../config.json';
-  
+
   export const PlacesContext = createContext();
   export const usePlaces = () => useContext(PlacesContext);
-  
+
   export const PlacesProvider = ({
     children
   }) => {
+    const [initialLoad, setInitialLoad] = useState(false);
     const [currentPlace, setCurrentPlace] = useState({});
     const [error, setError] = useState();
     const [loading, setLoading] = useState(false);
     const [places, setPlaces] = useState([]);
-  
+
     const refreshPlaces = useCallback(async () => {
       try {
         setError();
@@ -29,21 +30,22 @@ import {
         } = await axios.get(`${config.base_url}places`);
         setPlaces(data.data);
         return data.data;
-      } catch (error) { 
+      } catch (error) {
         setError(error);
       } finally {
         setLoading(false)
       }
-      
+
     }, []);
-  
+
     useEffect(() => {
-      if (places?.length === 0) {
+      if (!initialLoad) {
         refreshPlaces();
+        setInitialLoad(true);
       }
-    }, [refreshPlaces, places]);
-  
-    
+    }, [initialLoad, refreshPlaces]);
+
+
     const createOrUpdatePlace = useCallback(async ({
       id,
       name,
@@ -79,7 +81,7 @@ import {
         const place = places.find((p) => p.id === id);
         return await createOrUpdatePlace({ ...place, rating });
       }, [places, createOrUpdatePlace]);
-  
+
     const deletePlace = useCallback(async (id) => {
       setLoading(true);
       setError();
@@ -99,7 +101,7 @@ import {
         setLoading(false)
       }
     }, [refreshPlaces]);
-  
+
     const value = useMemo(() => ({
       currentPlace,
       setCurrentPlace,
@@ -110,8 +112,8 @@ import {
       deletePlace,
       createOrUpdatePlace,
     }), [places, error, loading, setCurrentPlace, ratePlace, deletePlace, currentPlace, createOrUpdatePlace])
-  
-    return ( 
+
+    return (
       <PlacesContext.Provider value={value}>
         {children}
       </PlacesContext.Provider>
