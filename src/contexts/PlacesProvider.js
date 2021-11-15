@@ -15,6 +15,7 @@ import {
   export const PlacesProvider = ({
     children
   }) => {
+    const [initialLoad, setInitialLoad] = useState(false);
     const [currentPlace, setCurrentPlace] = useState({});
     const [error, setError] = useState();
     const [loading, setLoading] = useState(false);
@@ -38,8 +39,16 @@ import {
     }, []);
 
     useEffect(() => {
+<<<<<<< HEAD
       refreshPlaces();
     }, [refreshPlaces]);
+=======
+      if (!initialLoad) {
+        refreshPlaces();
+        setInitialLoad(true);
+      }
+    }, [initialLoad, refreshPlaces]);
+>>>>>>> 4f16cc91e7c9989c55f060c43ce306865ffce8f2
 
 
     const createOrUpdatePlace = useCallback(async ({
