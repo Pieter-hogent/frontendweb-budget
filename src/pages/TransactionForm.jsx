@@ -2,7 +2,7 @@ import { useContext, useEffect, useCallback } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { Link, useParams, useHistory } from "react-router-dom";
 import { useTransactions } from "../contexts/TransactionsProvider";
-import { PlacesContext } from "../contexts/PlacesProvider.js";
+import { PlacesContext } from "../contexts/PlacesProvider";
 import LabelInput from "../components/LabelInput";
 import LabelSelect from "../components/LabelSelect";
 
@@ -36,13 +36,12 @@ const toDateInputString = (date) => {
 export default function TransactionForm() {
   const { id } = useParams();
   const history = useHistory();
+  const methods = useForm();
   const {
-    register,
     handleSubmit,
-    formState: { errors },
     reset,
     setValue,
-  } = useForm();
+  } = methods;
 
   const {
     currentTransaction,
@@ -99,11 +98,7 @@ export default function TransactionForm() {
   );
 
   return (
-    <FormProvider
-      handleSubmit={handleSubmit}
-      errors={errors}
-      register={register}
-    >
+    <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} className="m-5">
         <div className="grid grid-cols-6 gap-6">
           <LabelInput
