@@ -19,12 +19,14 @@ export const TransactionsProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [currentTransaction, setCurrentTransaction] = useState({});
 
+  const BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL || config.base_url;
+
   const refreshTransactions = useCallback(async () => {
     try {
       setError();
       setLoading(true);
       const { data } = await axios.get(
-        `${config.base_url}transactions?limit=25&offset=0`
+        `${BASE_URL}transactions?limit=25&offset=0`
       );
       setTransactions(data.data);
     } catch (error) {
@@ -32,7 +34,7 @@ export const TransactionsProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [BASE_URL]);
 
   useEffect(() => {
     if (!initialLoad) {
@@ -52,7 +54,7 @@ export const TransactionsProvider = ({ children }) => {
         user,
       };
       let method = id ? "put" : "post";
-      let url = `${config.base_url}transactions/${id ?? ""}`;
+      let url = `${BASE_URL}transactions/${id ?? ""}`;
       try {
         const { changedTransaction } = await axios({
           method,
@@ -68,7 +70,7 @@ export const TransactionsProvider = ({ children }) => {
         setLoading(false);
       }
     },
-    [refreshTransactions]
+    [refreshTransactions, BASE_URL]
   );
 
   const deleteTransaction = useCallback(
@@ -78,7 +80,7 @@ export const TransactionsProvider = ({ children }) => {
         setLoading(true);
         const { data } = await axios({
           method: "delete",
-          url: `${config.base_url}transactions/${id}`,
+          url: `${BASE_URL}transactions/${id}`,
         });
         refreshTransactions();
         return data;
@@ -89,7 +91,7 @@ export const TransactionsProvider = ({ children }) => {
         setLoading(false);
       }
     },
-    [refreshTransactions]
+    [refreshTransactions, BASE_URL]
   );
 
   const setTransactionToUpdate = useCallback(

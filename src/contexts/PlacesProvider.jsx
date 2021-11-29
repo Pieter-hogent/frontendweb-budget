@@ -1,67 +1,59 @@
 import {
-    createContext,
-    useState,
-    useEffect,
-    useCallback,
-    useContext,
-    useMemo
-  } from 'react';
-  import axios from 'axios';
-  import config from '../config.json';
+  createContext,
+  useState,
+  useEffect,
+  useCallback,
+  useContext,
+  useMemo,
+} from "react";
+import axios from "axios";
+import config from "../config.json";
 
-  export const PlacesContext = createContext();
-  export const usePlaces = () => useContext(PlacesContext);
+export const PlacesContext = createContext();
+export const usePlaces = () => useContext(PlacesContext);
 
-  export const PlacesProvider = ({
-    children
-  }) => {
-    const [initialLoad, setInitialLoad] = useState(false);
-    const [currentPlace, setCurrentPlace] = useState({});
-    const [error, setError] = useState();
-    const [loading, setLoading] = useState(false);
-    const [places, setPlaces] = useState([]);
+export const PlacesProvider = ({ children }) => {
+  const [initialLoad, setInitialLoad] = useState(false);
+  const [currentPlace, setCurrentPlace] = useState({});
+  const [error, setError] = useState();
+  const [loading, setLoading] = useState(false);
+  const [places, setPlaces] = useState([]);
 
-    const refreshPlaces = useCallback(async () => {
-      try {
-        setError();
-        setLoading(true);
-        const {
-          data
-        } = await axios.get(`${config.base_url}places`);
-        setPlaces(data.data);
-        return data.data;
-      } catch (error) {
-        setError(error);
-      } finally {
-        setLoading(false)
-      }
+  const BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL || config.base_url;
 
-    }, []);
+  const refreshPlaces = useCallback(async () => {
+    try {
+      setError();
+      setLoading(true);
+      const { data } = await axios.get(`${BASE_URL}places`);
+      setPlaces(data.data);
+      return data.data;
+    } catch (error) {
+      setError(error);
+    } finally {
+      setLoading(false);
+    }
+  }, [BASE_URL]);
 
-    useEffect(() => {
-      if (!initialLoad) {
-        refreshPlaces();
-        setInitialLoad(true);
-      }
-    }, [initialLoad, refreshPlaces]);
+  useEffect(() => {
+    if (!initialLoad) {
+      refreshPlaces();
+      setInitialLoad(true);
+    }
+  }, [initialLoad, refreshPlaces]);
 
-    const createOrUpdatePlace = useCallback(async ({
-      id,
-      name,
-      rating
-    }) => {
+  const createOrUpdatePlace = useCallback(
+    async ({ id, name, rating }) => {
       setError();
       setLoading(true);
       let data = {
         name,
-        rating
+        rating,
       };
-      let method = id ? 'put' : 'post';
-      let url = `${config.base_url}places/${id ?? ''}`;
+      let method = id ? "put" : "post";
+      let url = `${BASE_URL}places/${id ?? ""}`;
       try {
-        const {
-          changedPlace
-        } = await axios({
+        const { changedPlace } = await axios({
           method,
           url,
           data,
@@ -72,24 +64,28 @@ import {
         console.error(error);
         throw error;
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }, [refreshPlaces]);
+    },
+    [refreshPlaces, BASE_URL]
+  );
 
-    const ratePlace = useCallback(async (id, rating) => {
-        const place = places.find((p) => p.id === id);
-        return await createOrUpdatePlace({ ...place, rating });
-      }, [places, createOrUpdatePlace]);
+  const ratePlace = useCallback(
+    async (id, rating) => {
+      const place = places.find((p) => p.id === id);
+      return await createOrUpdatePlace({ ...place, rating });
+    },
+    [places, createOrUpdatePlace]
+  );
 
-    const deletePlace = useCallback(async (id) => {
+  const deletePlace = useCallback(
+    async (id) => {
       setLoading(true);
       setError();
       try {
-        const {
-          data
-        } = await axios({
-          method: 'delete',
-          url: `${config.base_url}places/${id}`,
+        const { data } = await axios({
+          method: "delete",
+          url: `${BASE_URL}places/${id}`,
         });
         refreshPlaces();
         return data;
@@ -97,11 +93,14 @@ import {
         console.error(error);
         throw error;
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }, [refreshPlaces]);
+    },
+    [refreshPlaces, BASE_URL]
+  );
 
-    const value = useMemo(() => ({
+  const value = useMemo(
+    () => ({
       currentPlace,
       setCurrentPlace,
       places,
@@ -110,11 +109,20 @@ import {
       ratePlace,
       deletePlace,
       createOrUpdatePlace,
-    }), [places, error, loading, setCurrentPlace, ratePlace, deletePlace, currentPlace, createOrUpdatePlace])
+    }),
+    [
+      places,
+      error,
+      loading,
+      setCurrentPlace,
+      ratePlace,
+      deletePlace,
+      currentPlace,
+      createOrUpdatePlace,
+    ]
+  );
 
-    return (
-      <PlacesContext.Provider value={value}>
-        {children}
-      </PlacesContext.Provider>
-    );
-  };
+  return (
+    <PlacesContext.Provider value={value}>{children}</PlacesContext.Provider>
+  );
+};
