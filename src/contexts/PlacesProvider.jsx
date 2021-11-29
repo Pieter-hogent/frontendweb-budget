@@ -19,7 +19,6 @@ export const PlacesProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [initialLoad, setInitialLoad] = useState(false);
   const [places, setPlaces] = useState([]);
-  const BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL || config.base_url;
 
   const refreshPlaces = useCallback(async () => {
     try {
