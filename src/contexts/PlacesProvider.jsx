@@ -4,15 +4,17 @@ import {
   useEffect,
   useCallback,
   useContext,
-  useMemo,
-} from "react";
-import axios from "axios";
-import { useSession } from "./AuthProvider";
+  useMemo
+} from 'react';
+import * as placesApi from '../api/places';
+import { useSession } from './AuthProvider';
 
 export const PlacesContext = createContext();
 export const usePlaces = () => useContext(PlacesContext);
 
-export const PlacesProvider = ({ children }) => {
+export const PlacesProvider = ({
+  children
+}) => {
   const { ready: authReady } = useSession();
   const [currentPlace, setCurrentPlace] = useState({});
   const [error, setError] = useState();
@@ -24,104 +26,79 @@ export const PlacesProvider = ({ children }) => {
     try {
       setError();
       setLoading(true);
-      const { data } = await axios.get(`${BASE_URL}places`);
+      const data = await placesApi.getAllPlaces();
       setPlaces(data.data);
       return data.data;
     } catch (error) {
       setError(error);
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, [BASE_URL]);
+  }, []);
 
   useEffect(() => {
-    if (!initialLoad) {
+    if (authReady && !initialLoad) {
       refreshPlaces();
       setInitialLoad(true);
     }
-  }, [initialLoad, refreshPlaces]);
+  }, [authReady, initialLoad, refreshPlaces]);
 
-  const createOrUpdatePlace = useCallback(
-    async ({ id, name, rating }) => {
-      setError();
-      setLoading(true);
-      let data = {
+  const createOrUpdatePlace = useCallback(async ({
+    id,
+    name,
+    rating
+  }) => {
+    setError();
+    setLoading(true);
+    try {
+      const changedPlace = await placesApi.savePlace({
+        id,
         name,
-        rating,
-      };
-      let method = id ? "put" : "post";
-      let url = `${BASE_URL}places/${id ?? ""}`;
-      try {
-        const { changedPlace } = await axios({
-          method,
-          url,
-          data,
-        });
-        await refreshPlaces();
-        return changedPlace;
-      } catch (error) {
-        console.error(error);
-        throw error;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [refreshPlaces, BASE_URL]
-  );
+        rating
+      });
+      await refreshPlaces();
+      return changedPlace;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    } finally {
+      setLoading(false)
+    }
+  }, [refreshPlaces]);
 
-  const ratePlace = useCallback(
-    async (id, rating) => {
-      const place = places.find((p) => p.id === id);
-      return await createOrUpdatePlace({ ...place, rating });
-    },
-    [places, createOrUpdatePlace]
-  );
+  const ratePlace = useCallback(async (id, rating) => {
+    const place = places.find((p) => p.id === id);
+    return await createOrUpdatePlace({ ...place, rating });
+  }, [places, createOrUpdatePlace]);
 
-  const deletePlace = useCallback(
-    async (id) => {
-      setLoading(true);
-      setError();
-      try {
-        const { data } = await axios({
-          method: "delete",
-          url: `${BASE_URL}places/${id}`,
-        });
-        refreshPlaces();
-        return data;
-      } catch (error) {
-        console.error(error);
-        throw error;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [refreshPlaces, BASE_URL]
-  );
+  const deletePlace = useCallback(async (id) => {
+    setLoading(true);
+    setError();
+    try {
+      await placesApi.deletePlace(id);
+      refreshPlaces();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    } finally {
+      setLoading(false)
+    }
+  }, [refreshPlaces]);
 
-  const value = useMemo(
-    () => ({
-      currentPlace,
-      setCurrentPlace,
-      places,
-      error,
-      loading,
-      ratePlace,
-      deletePlace,
-      createOrUpdatePlace,
-    }),
-    [
-      places,
-      error,
-      loading,
-      setCurrentPlace,
-      ratePlace,
-      deletePlace,
-      currentPlace,
-      createOrUpdatePlace,
-    ]
-  );
+  const value = useMemo(() => ({
+    currentPlace,
+    setCurrentPlace,
+    places,
+    error,
+    loading,
+    ratePlace,
+    deletePlace,
+    createOrUpdatePlace,
+  }), [places, error, loading, setCurrentPlace, ratePlace, deletePlace, currentPlace, createOrUpdatePlace])
 
   return (
-    <PlacesContext.Provider value={value}>{children}</PlacesContext.Provider>
+    <PlacesContext.Provider value={value}>
+      {children}
+    </PlacesContext.Provider>
   );
 };
